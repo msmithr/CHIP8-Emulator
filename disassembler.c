@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 int disassemble(unsigned char *buff, unsigned short pc) {
     uint8_t *opcode = &buff[pc];
 
-    printf("%04x %02x %02x\t", pc, opcode[0], opcode[1]);
+    printf("%04x %02x %02x\t", pc+0x200, opcode[0], opcode[1]);
     switch (opcode[0]>>4) {
         case 0x0: 
             switch (opcode[1]) {
