@@ -58,12 +58,36 @@ void LD_REG_BYTE(chip8 *machine) {
     machine->V[(machine->opcode&0xf00)>>2] = machine->opcode&0xff;
 }
 
+// ADD Vx, byte: add byte to Vx
+void ADD_REG_BYTE(chip8 *machine) { 
+    debug("%03x ADD_REG_BYTE\n", machine->pc);
+    machine->V[(machine->opcode&0xf00)>>2] += machine->opcode&0xff;
+}
 
-void ADD_REG_BYTE(chip8 *machine) { debug("%03x ADD_REG_BYTE\n", machine->pc); }
-void LD_REG_REG(chip8 *machine) { debug("%03x LD_REG_REG\n", machine->pc); }
-void OR_REG_REG(chip8 *machine) { debug("%03x OR_REG_REG\n", machine->pc); }
-void AND_REG_REG(chip8 *machine) { debug("%03x AND_REG_REG\n", machine->pc); }
-void XOR_REG_REG(chip8 *machine) { debug("%03x XOR_REG_REG\n", machine->pc); }
+// LD Vx, Vy: store Vy in Vx
+void LD_REG_REG(chip8 *machine) { 
+    debug("%03x LD_REG_REG\n", machine->pc); 
+    machine->V[(machine->opcode&0xf00)>>2] = machine->V[(machine->opcode&0xf0)>>1];
+}
+
+// OR Vx, Vy: Vx |= Vy
+void OR_REG_REG(chip8 *machine) { 
+    debug("%03x OR_REG_REG\n", machine->pc); 
+    machine->V[(machine->opcode&0xf00)>>2] |= machine->V[(machine->opcode&0xf0)>>1];
+}
+
+// AND Vx, Vy: Vx &= Vy
+void AND_REG_REG(chip8 *machine) { 
+    debug("%03x AND_REG_REG\n", machine->pc); 
+    machine->V[(machine->opcode&0xf00)>>2] &= machine->V[(machine->opcode&0xf0)>>1];
+}
+
+// XOR Vx, Vy: Vx ^= Vy
+void XOR_REG_REG(chip8 *machine) { 
+    debug("%03x XOR_REG_REG\n", machine->pc); 
+    machine->V[(machine->opcode&0xf00)>>2] ^= machine->V[(machine->opcode&0xf0)>>1];
+}
+
 void ADD_REG_REG(chip8 *machine) { debug("%03x ADD_REG_REG\n", machine->pc); }
 void SUB_REG_REG(chip8 *machine) { debug("%03x SUB_REG_REG\n", machine->pc); }
 void SHR(chip8 *machine) { debug("%03x SHR\n", machine->pc); }
