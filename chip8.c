@@ -75,11 +75,12 @@ void cycle(chip8 *machine) {
     /* decode and execute the opcode*/
     switch (opcode >> 12) {
         case 0x0: 
-            switch (opcode & 0xf) {
+            switch (opcode & 0xff) {
                 case 0xe0: CLS(machine); break;
                 case 0xee: RET(machine); break;
-                default: printf("UNKNOWN INSTRUCTION\n"); break;
+                default: printf("UNKNOWN INSTRUCTION 0\n"); break;
             }
+            break;
         case 0x1: JP_ADDR(machine); break;
         case 0x2: CALL_ADDR(machine); break;
         case 0x3: SE_REG_BYTE(machine); break;
@@ -88,7 +89,7 @@ void cycle(chip8 *machine) {
         case 0x6: LD_REG_BYTE(machine); break;
         case 0x7: ADD_REG_BYTE(machine); break;
         case 0x8: 
-            switch (opcode & 0x3) {
+            switch (opcode & 0xf) {
                 case 0x0: LD_REG_REG(machine); break;
                 case 0x1: OR_REG_REG(machine); break;
                 case 0x2: AND_REG_REG(machine); break;
@@ -98,21 +99,23 @@ void cycle(chip8 *machine) {
                 case 0x6: SHR(machine); break;
                 case 0x7: SUBN(machine); break;
                 case 0xe: SHL(machine); break;
-                default: printf("UNKNOWN INSTRUCTION\n"); break;
+                default: printf("UNKNOWN INSTRUCTION 8\n"); break;
             }
+            break;
         case 0x9: SNE_REG_REG(machine); break;
         case 0xa: LD_I_ADDR(machine); break;
         case 0xb: JP_V0_ADDR(machine); break;
         case 0xc: RND(machine); break;
         case 0xd: DRW(machine); break;
         case 0xe: 
-            switch (opcode & 0xf) {
+            switch (opcode & 0xff) {
                 case 0x9e: SKP(machine); break;
                 case 0xa1: SKNP(machine); break;
-                default: printf("UNKNOWN INSTRUCTION\n"); break;
+                default: printf("UNKNOWN INSTRUCTION E\n"); break;
             }
+            break;
         case 0xf: 
-            switch (opcode & 0xf) {
+            switch (opcode & 0xff) {
                 case 0x07: LD_REG_DT(machine); break;
                 case 0x0a: LD_REG_K(machine); break;
                 case 0x15: LD_DT_REG(machine); break;
@@ -122,8 +125,9 @@ void cycle(chip8 *machine) {
                 case 0x33: LD_B_REG(machine); break;
                 case 0x55: LD_I_REG(machine); break;
                 case 0x65: LD_REG_I(machine); break;
-                default: printf("UNKNOWN INSTRUCTION\n"); break;
+                default: printf("UNKNOWN INSTRUCTION F\n"); break;
             }
+            break;
         default: printf("UNKNOWN INSTRUCTION\n"); break;
     }
 
@@ -135,6 +139,9 @@ void cycle(chip8 *machine) {
 
 int main() {
     chip8 *machine = initialize("pong.rom");
+    for (int i = 0; i < 123; i++) {
+        cycle(machine);
+    }
 
     printf("%d\n", machine->sound_timer);
     return 0;
