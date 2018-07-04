@@ -70,12 +70,12 @@ static void decrement_timers(chip8 *machine) {
 
 
 void cycle(chip8 *machine) {
-    unsigned short opcode = fetch_opcode(machine);
+   machine->opcode = fetch_opcode(machine);
 
     /* decode and execute the opcode*/
-    switch (opcode >> 12) {
+    switch (machine->opcode >> 12) {
         case 0x0: 
-            switch (opcode & 0xff) {
+            switch (machine->opcode & 0xff) {
                 case 0xe0: CLS(machine); break;
                 case 0xee: RET(machine); break;
                 default: printf("UNKNOWN INSTRUCTION 0\n"); break;
@@ -89,7 +89,7 @@ void cycle(chip8 *machine) {
         case 0x6: LD_REG_BYTE(machine); break;
         case 0x7: ADD_REG_BYTE(machine); break;
         case 0x8: 
-            switch (opcode & 0xf) {
+            switch (machine->opcode & 0xf) {
                 case 0x0: LD_REG_REG(machine); break;
                 case 0x1: OR_REG_REG(machine); break;
                 case 0x2: AND_REG_REG(machine); break;
@@ -108,14 +108,14 @@ void cycle(chip8 *machine) {
         case 0xc: RND(machine); break;
         case 0xd: DRW(machine); break;
         case 0xe: 
-            switch (opcode & 0xff) {
+            switch (machine->opcode & 0xff) {
                 case 0x9e: SKP(machine); break;
                 case 0xa1: SKNP(machine); break;
                 default: printf("UNKNOWN INSTRUCTION E\n"); break;
             }
             break;
         case 0xf: 
-            switch (opcode & 0xff) {
+            switch (machine->opcode & 0xff) {
                 case 0x07: LD_REG_DT(machine); break;
                 case 0x0a: LD_REG_K(machine); break;
                 case 0x15: LD_DT_REG(machine); break;
@@ -143,6 +143,5 @@ int main() {
         cycle(machine);
     }
 
-    printf("%d\n", machine->sound_timer);
     return 0;
 }
