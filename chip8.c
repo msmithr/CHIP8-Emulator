@@ -34,8 +34,8 @@ chip8 *initialize(char *rom) {
     memset(machine->key, '\0', sizeof(machine->key));
     machine->I = 0;
     machine->pc = 0x200;
-    machine->delay_timer = 0;
-    machine->sound_timer = 0;
+    machine->dt= 0;
+    machine->st= 0;
     machine->sp = 0;
     machine->opcode = 0;
 
@@ -56,13 +56,13 @@ static unsigned short fetch_opcode(chip8 *machine) {
 }
 
 static void decrement_timers(chip8 *machine) {
-    if (machine->delay_timer > 0) {
-        machine->delay_timer--;
+    if (machine->dt> 0) {
+        machine->dt--;
     }   
 
-    if (machine->sound_timer > 0) {
-        machine->sound_timer--;
-        if (machine->sound_timer == 0) {
+    if (machine->st> 0) {
+        machine->st--;
+        if (machine->st== 0) {
             printf("BEEP\n");
         }   
     }   
@@ -139,7 +139,7 @@ void cycle(chip8 *machine) {
 
 int main() {
     chip8 *machine = initialize("pong.rom");
-    for (int i = 0; i < 123; i++) {
+    for (int i = 0; i < 10000; i++) {
         cycle(machine);
     }
 

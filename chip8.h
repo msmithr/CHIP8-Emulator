@@ -6,8 +6,8 @@ typedef struct c8 {
     unsigned short I;
     unsigned short pc; 
     unsigned char disp[64*32];
-    unsigned char delay_timer;
-    unsigned char sound_timer;
+    unsigned char dt;
+    unsigned char st;
     unsigned short stack[16];
     unsigned short sp; 
     unsigned char key[16];
