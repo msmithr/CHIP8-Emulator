@@ -6,12 +6,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <SDL2/SDL.h>
 #include "chip8.h"
-#include "instructions.h"
 
+#include "instructions.h"
 static unsigned short fetch_opcode(chip8 *machine);
 static void decrement_timers(chip8 *machine);
 void cycle(chip8 *machine);
+void set_keys(chip8 *machine);
 
 // initialize a chip8 object, given the filepath to a rom file
 chip8 *initialize(char *rom) {
@@ -51,6 +53,27 @@ chip8 *initialize(char *rom) {
         return NULL;
     }
 
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+        printf("%s\n", strerror(errno));
+        return NULL;
+    }
+
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
+
+    window = SDL_CreateWindow(
+        "Chip8",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        1024,
+        512,
+        0
+    );
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 64, 32);
+
     return machine;
 }
 
@@ -78,7 +101,8 @@ static void decrement_timers(chip8 *machine) {
 
 // execute a single CPU cycle
 void cycle(chip8 *machine) {
-   machine->opcode = fetch_opcode(machine);
+    machine->opcode = fetch_opcode(machine);
+    set_keys(machine); 
 
     /* decode and execute the opcode */
     switch (machine->opcode >> 12) {
@@ -144,9 +168,32 @@ void cycle(chip8 *machine) {
     machine->pc+=2;
 }
 
+void set_keys(chip8 *machine) {
+    SDL_PumpEvents();
+    const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+
+    machine->key[0x0] = keystates[SDL_SCANCODE_X];
+    machine->key[0x1] = keystates[SDL_SCANCODE_1];
+    machine->key[0x2] = keystates[SDL_SCANCODE_2];
+    machine->key[0x3] = keystates[SDL_SCANCODE_3];
+    machine->key[0x4] = keystates[SDL_SCANCODE_Q];
+    machine->key[0x5] = keystates[SDL_SCANCODE_W];
+    machine->key[0x6] = keystates[SDL_SCANCODE_E];
+    machine->key[0x7] = keystates[SDL_SCANCODE_A];
+    machine->key[0x8] = keystates[SDL_SCANCODE_S];
+    machine->key[0x9] = keystates[SDL_SCANCODE_D];
+    machine->key[0xa] = keystates[SDL_SCANCODE_Z];
+    machine->key[0xb] = keystates[SDL_SCANCODE_C];
+    machine->key[0xc] = keystates[SDL_SCANCODE_4];
+    machine->key[0xd] = keystates[SDL_SCANCODE_R];
+    machine->key[0xe] = keystates[SDL_SCANCODE_F];
+    machine->key[0xe] = keystates[SDL_SCANCODE_V];
+}
+
 
 int main() {
     chip8 *machine = initialize("pong.rom");
+
     while (1) {
         cycle(machine);
     }
