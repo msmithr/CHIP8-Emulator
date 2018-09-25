@@ -106,16 +106,42 @@ void XOR_REG_REG(chip8 *machine) {
     *Vx(machine) ^= *Vy(machine);
 }
 
-// TODO
-void ADD_REG_REG(chip8 *machine) { debug("%03x ADD_REG_REG\n", machine->pc); }
-// TODO
-void SUB_REG_REG(chip8 *machine) { debug("%03x SUB_REG_REG\n", machine->pc); }
-// TODO
-void SHR(chip8 *machine) { debug("%03x SHR\n", machine->pc); }
-// TODO
-void SUBN(chip8 *machine) { debug("%03x SUBN\n", machine->pc); }
-// TODO
-void SHL(chip8 *machine) { debug("%03x SHL\n", machine->pc); }
+// ADD Vx, Vy: Vx += Vy. If the result is more than 255 bits, set VF to 1
+void ADD_REG_REG(chip8 *machine) { 
+    debug("%03x ADD_REG_REG\n", machine->pc); 
+    unsigned int sum = *Vx(machine) + *Vy(machine);
+    machine->V[0xf] = sum > 255 ? 1 : 0;
+    *Vx(machine) = sum;
+}
+
+// SUB Vx, Vy: Vx -= Vy, set VF = NOT borrow
+// if Vx > Vy, VF set to 1, otherwise 0, then subtraction occurs
+void SUB_REG_REG(chip8 *machine) { 
+    debug("%03x SUB_REG_REG\n", machine->pc); 
+    machine->V[0xf] = *Vx(machine) > *Vy(machine) ? 1 : 0;
+    *Vx(machine) -= *Vy(machine);
+}
+
+// SHR VX {, Vy} If least significant bit of Vx is 1, VF is set to 1, otherwise 0. Vx is divided by 2
+void SHR(chip8 *machine) { 
+    debug("%03x SHR\n", machine->pc); 
+    machine->V[0xf] = (*Vx(machine) & 0x1) == 1 ? 1 : 0;
+    *Vx(machine) /= 2;
+}
+
+// SUBN Vx, Vy: Vx = Vy - Vx, VF = NOT borrow
+void SUBN(chip8 *machine) { 
+    debug("%03x SUBN\n", machine->pc); 
+    machine->V[0xf] = *Vy(machine) > *Vx(machine) ? 1 : 0;
+    *Vx(machine) = *Vy(machine) - *Vx(machine);
+}
+
+// SHL Vx {, Vy} (shift left). If most significant bit of Vx is 1, VF = 1, otherwise 0
+void SHL(chip8 *machine) { 
+    debug("%03x SHL\n", machine->pc); 
+    machine->V[0xf] = (*Vx(machine) & 0x1) == 1 ? 1 : 0;
+    *Vx(machine) *= 2;
+}
 
 // SNE Vx, Vy: if Vx != Vy, increment pc by 2
 void SNE_REG_REG(chip8 *machine) {
@@ -145,10 +171,20 @@ void RND(chip8 *machine) {
 
 // TODO
 void DRW(chip8 *machine) { debug("%03x DRW\n", machine->pc); }
-// TODO
-void SKP(chip8 *machine) { debug("%03x SKP\n", machine->pc); }
-// TODO
-void SKNP(chip8 *machine) { debug("%03x SKNP\n", machine->pc); }
+
+// SKP Vx: Skip the next instruction if key Vx is pressed
+void SKP(chip8 *machine) { 
+    debug("%03x SKP\n", machine->pc); 
+    if (machine->key[*Vx(machine)] == 1)
+        machine->pc += 2;
+}
+
+// SKNP Vx: Skip the next instruction if key Vx is not pressed
+void SKNP(chip8 *machine) { 
+    debug("%03x SKNP\n", machine->pc); 
+    if (machine->key[*Vx(machine)] != 1)
+        machine->pc += 2;
+}
 
 // LD Vx, DT: set Vx to DT
 void LD_REG_DT(chip8 *machine) { 
@@ -179,8 +215,15 @@ void ADD_I_REG(chip8 *machine) {
 
 // TODO
 void LD_F_REG(chip8 *machine) { debug("%03x LD_F_REG\n", machine->pc); }
-// TODO
-void LD_B_REG(chip8 *machine) { debug("%03x LD_B_REG\n", machine->pc); }
+
+// LD B, Vx: Store BCD representation of Vx at I->I+2
+void LD_B_REG(chip8 *machine) { 
+    debug("%03x LD_B_REG\n", machine->pc); 
+    int value = *Vx(machine);
+    machine->mem[machine->I] = (value % 1000) / 100;
+    machine->mem[machine->I+1] = (value % 100) / 10;
+    machine->mem[machine->I+2] = (value % 10);
+}
 
 // LD I, Vx: store registers v0 to Vx in memory starting at I
 void LD_I_REG(chip8 *machine) { 

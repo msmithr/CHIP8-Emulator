@@ -13,20 +13,24 @@ static unsigned short fetch_opcode(chip8 *machine);
 static void decrement_timers(chip8 *machine);
 void cycle(chip8 *machine);
 
+// initialize a chip8 object, given the filepath to a rom file
 chip8 *initialize(char *rom) {
     int fd;
     chip8 *machine;
 
+    // open the rom file
     if ((fd = open(rom, O_RDONLY)) == -1) {
         printf("%s\n", strerror(errno));
         return NULL;
     }
 
+    // allocate memory for the chip8 object 
     if ((machine = malloc(sizeof(chip8))) == NULL) {
         printf("%s\n", strerror(errno));
         return NULL;
     }
 
+    // initialize memory for the chip8 object
     memset(machine->mem, '\0', sizeof(machine->mem));
     memset(machine->V, '\0', sizeof(machine->V));
     memset(machine->disp, '\0', sizeof(machine->disp));
@@ -39,6 +43,7 @@ chip8 *initialize(char *rom) {
     machine->sp = 0;
     machine->opcode = 0;
 
+    // read the rom file into memory
     unsigned char *subbuff = &machine->mem[machine->pc];
     if (read(fd, subbuff, 4096) == -1) {
         printf("%s\n", strerror(errno));
@@ -49,12 +54,14 @@ chip8 *initialize(char *rom) {
     return machine;
 }
 
+// get the next unread opcode from memory
 static unsigned short fetch_opcode(chip8 *machine) {
     unsigned short byte1 = machine->mem[machine->pc];
     unsigned short byte2 = machine->mem[machine->pc + 1];
     return (byte1 << 8) | byte2; 
 }
 
+// decrement the timers, to be called at the end of each CPU cycle
 static void decrement_timers(chip8 *machine) {
     if (machine->dt> 0) {
         machine->dt--;
@@ -69,10 +76,11 @@ static void decrement_timers(chip8 *machine) {
 }
 
 
+// execute a single CPU cycle
 void cycle(chip8 *machine) {
    machine->opcode = fetch_opcode(machine);
 
-    /* decode and execute the opcode*/
+    /* decode and execute the opcode */
     switch (machine->opcode >> 12) {
         case 0x0: 
             switch (machine->opcode & 0xff) {
@@ -139,7 +147,7 @@ void cycle(chip8 *machine) {
 
 int main() {
     chip8 *machine = initialize("pong.rom");
-    for (int i = 0; i < 10000; i++) {
+    while (1) {
         cycle(machine);
     }
 
