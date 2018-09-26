@@ -1,8 +1,10 @@
 #include "instructions.h"
 #include "debug.h"
+#include "keyboard.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 
 static unsigned char *Vx(chip8 *machine) {
     return &machine->V[(machine->opcode&0xf00)>>8];
@@ -192,10 +194,26 @@ void LD_REG_DT(chip8 *machine) {
     *Vx(machine) = machine->dt;
 }
 
-// TODO
-void LD_REG_K(chip8 *machine) { debug("%03x LD_REG_K\n", machine->pc); }
+// LD Vx, K: wait for a key press, store value in Vx
+void LD_REG_K(chip8 *machine) { 
+    debug("%03x LD_REG_K\n", machine->pc); 
+    int keyEvent = 0;
+    SDL_Event event;
+    while (!keyEvent) {
+        SDL_WaitEvent(&event);
+        if (event.type == SDL_KEYDOWN) {
+            int scancode = event.key.keysym.scancode;
+            if (key_from_sdlscancode(scancode) != -1) {
+                keyEvent = 1;
+                *Vx(machine) = key_from_sdlscancode(scancode);
+            }
+        }
+    }
+}
+
 
 // LD DT, Vx: set DT to Vx
+
 void LD_DT_REG(chip8 *machine) { 
     debug("%03x LD_DT_REG\n", machine->pc); 
     machine->dt = *Vx(machine);
