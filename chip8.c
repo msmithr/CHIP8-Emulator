@@ -11,9 +11,29 @@
 
 #include "instructions.h"
 #include "keyboard.h"
+#include "display.h"
 static unsigned short fetch_opcode(chip8 *machine);
 static void decrement_timers(chip8 *machine);
 void cycle(chip8 *machine);
+
+unsigned char fontset[80] = {
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
 
 // initialize a chip8 object, given the filepath to a rom file
 chip8 *initialize(char *rom) {
@@ -45,6 +65,11 @@ chip8 *initialize(char *rom) {
     machine->sp = 0;
     machine->opcode = 0;
 
+    // load the fontset into memory
+    for (int i = 0; i < 80; i++) {
+        machine->mem[i] = fontset[i];
+    }
+
     // read the rom file into memory
     unsigned char *subbuff = &machine->mem[machine->pc];
     if (read(fd, subbuff, 4096) == -1) {
@@ -53,26 +78,9 @@ chip8 *initialize(char *rom) {
         return NULL;
     }
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        printf("%s\n", strerror(errno));
-        return NULL;
-    }
-
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
-
-    window = SDL_CreateWindow(
-        "Chip8",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        1024,
-        512,
-        0
-    );
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 64, 32);
+    // setup display
+    display_init();
+    render(machine);
 
     return machine;
 }
@@ -163,16 +171,27 @@ void cycle(chip8 *machine) {
         default: printf("UNKNOWN INSTRUCTION\n"); break;
     }
 
+    render(machine);
     decrement_timers(machine);
-
     machine->pc+=2;
 }
 
-int main() {
-    chip8 *machine = initialize("pong.rom");
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: ./emu <rom>\n");
+        exit(1);
+    }
+    char *rom = argv[1];
+
+    chip8 *machine = initialize(rom);
+    if (machine == NULL)
+        exit(1);
 
     while (1) {
         cycle(machine);
+#ifdef STEP
+        getchar();
+#endif
     }
 
     return 0;

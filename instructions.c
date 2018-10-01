@@ -1,6 +1,7 @@
 #include "instructions.h"
 #include "debug.h"
 #include "keyboard.h"
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -16,6 +17,10 @@ static unsigned char *Vy(chip8 *machine) {
 
 static unsigned char byte(chip8 *machine) {
     return (machine->opcode)&0xff;
+}
+
+static unsigned char nibble(chip8 *machine) {
+    return (machine->opcode)&0xf;
 }
 
 static unsigned short addr(chip8 *machine) {
@@ -171,8 +176,26 @@ void RND(chip8 *machine) {
     *Vx(machine) = (rand() % 256) & byte(machine);
 }
 
-// TODO
-void DRW(chip8 *machine) { debug("%03x DRW\n", machine->pc); }
+// DRW Vx, Vy, nibble: Draw nibble-bit sprite at memory location I starting at (Vx, Vy),
+// set VF = collision
+void DRW(chip8 *machine) { 
+    debug("%03x DRW\n", machine->pc); 
+    machine->V[0xf] = 0;
+
+    int startX = *Vx(machine);
+    int startY = *Vy(machine);
+
+    unsigned int height = nibble(machine);
+    for (int y = 0; y < height; y++) {
+        unsigned char value = machine->mem[machine->I + y];
+        for (int x = 0; x < 8; x++) {
+            unsigned char bit = value & (0x80 >> x); // the xth bit in the byte
+            if (bit && machine->disp[(startY + y)*CHIP8_WIDTH + (startX + x)])
+                machine->V[0xf] = 1; // collision
+            machine->disp[(startY + y)*CHIP8_WIDTH + (startX + x)] ^= bit;
+        }
+    }
+}
 
 // SKP Vx: Skip the next instruction if key Vx is pressed
 void SKP(chip8 *machine) { 
@@ -231,8 +254,11 @@ void ADD_I_REG(chip8 *machine) {
     machine->I += *Vx(machine);
 }
 
-// TODO
-void LD_F_REG(chip8 *machine) { debug("%03x LD_F_REG\n", machine->pc); }
+// LD F,Vx: Set I = location of sprite for the digit Vx
+void LD_F_REG(chip8 *machine) { 
+    debug("%03x LD_F_REG\n", machine->pc); 
+    machine->I = *Vx(machine) * 5;
+}
 
 // LD B, Vx: Store BCD representation of Vx at I->I+2
 void LD_B_REG(chip8 *machine) { 

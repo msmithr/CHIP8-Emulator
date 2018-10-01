@@ -1,16 +1,13 @@
 #include <SDL2/SDL.h>
 #include <errno.h>
+#include "display.h"
+#include "config.h"
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define CHIP8_WIDTH 64
-#define CHIP8_HEIGHT 32
+SDL_Window *window;
+SDL_Renderer *renderer;
+SDL_Texture *texture;
 
 int display_init() {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
-
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         printf("%s\n", strerror(errno));
         return -1;
@@ -53,7 +50,19 @@ int display_init() {
     return 0;
 }
 
-int main() {
-    display_init();
-    return 0;
+void render(chip8 *machine) {
+    for (int x = 0; x < CHIP8_WIDTH; x++) {
+        for (int y = 0; y < CHIP8_HEIGHT; y++) {
+            if (machine->disp[y*CHIP8_WIDTH + x]) {
+                SDL_Rect rect;
+                rect.x = x * SCREEN_WIDTH_SCALE_FACTOR;
+                rect.y = y * SCREEN_WIDTH_SCALE_FACTOR;
+                rect.w = SCREEN_WIDTH_SCALE_FACTOR;
+                rect.h = SCREEN_HEIGHT_SCALE_FACTOR;
+                SDL_RenderFillRect(renderer, &rect);
+            }
+        }
+    }
+
+    SDL_RenderPresent(renderer);
 }
