@@ -48,3 +48,9 @@ int key_from_sdlscancode(Uint8 scancode) {
     if (scancode == SDL_SCANCODE_F) return 0xe;
     return -1;
 }
+
+int check_for_exit() {
+    SDL_PumpEvents();
+    const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+    return keystates[SDL_SCANCODE_ESCAPE];   
+}

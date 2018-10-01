@@ -192,6 +192,9 @@ int main(int argc, char *argv[]) {
 #ifdef STEP
         getchar();
 #endif
+        if (check_for_exit()) {
+            exit(0);
+        }
     }
 
     return 0;
