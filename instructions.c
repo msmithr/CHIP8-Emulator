@@ -190,9 +190,16 @@ void DRW(chip8 *machine) {
         unsigned char value = machine->mem[machine->I + y];
         for (int x = 0; x < 8; x++) {
             unsigned char bit = value & (0x80 >> x); // the xth bit in the byte
-            if (bit && machine->disp[(startY + y)*CHIP8_WIDTH + (startX + x)])
-                machine->V[0xf] = 1; // collision
-            machine->disp[(startY + y)*CHIP8_WIDTH + (startX + x)] ^= bit;
+            int b = (bit) ? 1 : 0;
+            int coord = (startY + y)*CHIP8_WIDTH + (startX + x);
+            if (b) {
+                if (machine->disp[coord]) {
+                    machine->V[0xf] = 1; // collision
+                    machine->disp[coord] = 0;
+                } else {
+                    machine->disp[coord] = 1;
+                }
+            }
         }
     }
 }
