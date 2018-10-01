@@ -51,9 +51,7 @@ int display_init() {
 }
 
 void render(chip8 *machine) {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
 
     for (int x = 0; x < CHIP8_WIDTH; x++) {
         for (int y = 0; y < CHIP8_HEIGHT; y++) {
