@@ -1,22 +1,22 @@
 #include <SDL2/SDL.h>
 #include <errno.h>
 #include "display.h"
-#include "config.h"
 
 SDL_Window *window;
 SDL_Renderer *renderer;
-SDL_Texture *texture;
 SDL_AudioSpec wavSpec;
 Uint32 wavLength;
 Uint8 *wavBuffer;
 SDL_AudioDeviceID deviceId;
 
+// initialize the display
 int display_init() {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         printf("%s\n", strerror(errno));
         return -1;
     }
 
+    // set up the window and renderer
     window = SDL_CreateWindow(
         "Chip8",
         SDL_WINDOWPOS_CENTERED,
@@ -38,19 +38,6 @@ int display_init() {
         return -1;
     }
      
-    texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        CHIP8_WIDTH,
-        CHIP8_HEIGHT 
-    );
-
-    if (texture == NULL) {
-        printf("%s\n", strerror(errno));
-        return -1;
-    }
-
     // set up audio
     SDL_LoadWAV("beep.wav", &wavSpec, &wavBuffer, &wavLength);
     deviceId = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
@@ -58,6 +45,7 @@ int display_init() {
     return 0;
 }
 
+// update the display based on the current machine display state
 void render(chip8 *machine) {
     SDL_RenderClear(renderer);
 
@@ -77,6 +65,7 @@ void render(chip8 *machine) {
     SDL_RenderPresent(renderer);
 }
 
+// make the beep sound
 void beep() {
     SDL_QueueAudio(deviceId, wavBuffer, wavLength);
     SDL_PauseAudioDevice(deviceId, 0);

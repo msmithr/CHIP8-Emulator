@@ -1,6 +1,7 @@
 #include "keyboard.h"
 #include <SDL2/SDL.h>
 
+// set the machine keypad state
 void set_keys(chip8 *machine) {
     SDL_PumpEvents();
     const Uint8 *keystates = SDL_GetKeyboardState(NULL);
@@ -10,7 +11,7 @@ void set_keys(chip8 *machine) {
     }
 }
 
-
+// mapping key value -> sdl scancode
 Uint8 sdlscancode_from_key(int key) {
     if (key == 0x0) return SDL_SCANCODE_X;
     if (key == 0x1) return SDL_SCANCODE_1;
@@ -31,6 +32,7 @@ Uint8 sdlscancode_from_key(int key) {
     return -1;
 }
 
+// mapping sdl scancode -> key value 
 int key_from_sdlscancode(Uint8 scancode) {
     if (scancode == SDL_SCANCODE_X) return 0x0;
     if (scancode == SDL_SCANCODE_1) return 0x1;
@@ -51,6 +53,7 @@ int key_from_sdlscancode(Uint8 scancode) {
     return -1;
 }
 
+// check if the exit key is pressed
 int check_for_exit() {
     SDL_PumpEvents();
     const Uint8 *keystates = SDL_GetKeyboardState(NULL);
