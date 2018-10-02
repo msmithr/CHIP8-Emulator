@@ -27,6 +27,7 @@ Uint8 sdlscancode_from_key(int key) {
     if (key == 0xc) return SDL_SCANCODE_4;
     if (key == 0xd) return SDL_SCANCODE_R;
     if (key == 0xe) return SDL_SCANCODE_F;
+    if (key == 0xf) return SDL_SCANCODE_V;
     return -1;
 }
 
@@ -46,6 +47,7 @@ int key_from_sdlscancode(Uint8 scancode) {
     if (scancode == SDL_SCANCODE_4) return 0xc;
     if (scancode == SDL_SCANCODE_R) return 0xd;
     if (scancode == SDL_SCANCODE_F) return 0xe;
+    if (scancode == SDL_SCANCODE_V) return 0xf;
     return -1;
 }
 

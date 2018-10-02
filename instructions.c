@@ -232,7 +232,10 @@ void LD_REG_K(chip8 *machine) {
     while (!keyEvent) {
         SDL_WaitEvent(&event);
         if (event.type == SDL_KEYDOWN) {
+            check_for_exit();
             int scancode = event.key.keysym.scancode;
+            if (scancode == SDL_SCANCODE_ESCAPE)
+                exit(0);
             if (key_from_sdlscancode(scancode) != -1) {
                 keyEvent = 1;
                 *Vx(machine) = key_from_sdlscancode(scancode);
