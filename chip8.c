@@ -101,7 +101,7 @@ static void decrement_timers(chip8 *machine) {
     if (machine->st> 0) {
         machine->st--;
         if (machine->st== 0) {
-            printf("BEEP\n");
+            beep();
         }   
     }   
 }

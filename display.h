@@ -2,3 +2,4 @@
 
 int display_init();
 void render(chip8 *machine);
+void beep();

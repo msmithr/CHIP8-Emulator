@@ -6,6 +6,10 @@
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_Texture *texture;
+SDL_AudioSpec wavSpec;
+Uint32 wavLength;
+Uint8 *wavBuffer;
+SDL_AudioDeviceID deviceId;
 
 int display_init() {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -47,6 +51,10 @@ int display_init() {
         return -1;
     }
 
+    // set up audio
+    SDL_LoadWAV("beep.wav", &wavSpec, &wavBuffer, &wavLength);
+    deviceId = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
+
     return 0;
 }
 
@@ -67,4 +75,9 @@ void render(chip8 *machine) {
     }
 
     SDL_RenderPresent(renderer);
+}
+
+void beep() {
+    SDL_QueueAudio(deviceId, wavBuffer, wavLength);
+    SDL_PauseAudioDevice(deviceId, 0);
 }
