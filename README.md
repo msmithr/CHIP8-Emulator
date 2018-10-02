@@ -1,5 +1,5 @@
 # CHIP-8-Emulator
-A CHIP-8 Emulator written in C, using SDL2.
+A CHIP-8 Emulator written in C, using SDL2
 
 Requires libsdl2-dev
 
