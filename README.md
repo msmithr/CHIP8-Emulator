@@ -7,7 +7,7 @@ Requires libsdl2-dev
 
 #### TODO:
 Regulate CPU cycle frequency  
-Add some kind of interface for selecting roms, go back to that interface on exit instead of killing the process
+Add some kind of interface for selecting roms, go back to that interface on exit instead of killing the process  
 Add a config file for anything that might need to be changed
 * CPU Hz  
 * Pixel color
